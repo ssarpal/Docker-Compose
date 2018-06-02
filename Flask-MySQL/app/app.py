@@ -1,5 +1,6 @@
 from flask import Flask
 from flask import request
+from flask import render_template
 from model import db
 from model import User
 from model import CreateDB
@@ -13,7 +14,25 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-	return 'Hello World! Docker-Compose for Flask & Mysql\n'
+    # return 'Hello World! Docker-Compose for Flask & Mysql\n'
+    return render_template('index.html')
+
+@app.route("/form", methods=["GET", "POST"])
+def my_form():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        fax = request.form.get('fax')
+
+	try:
+            user = User(username, email, phone, fax)
+            db.session.add(user)
+            db.session.commit()
+            return json.dumps({'status':True})
+        except IntegrityError:
+            return json.dumps({'status':False})
+    return render_template('my_form.html')
 
 @app.route('/user')
 def show_user():
